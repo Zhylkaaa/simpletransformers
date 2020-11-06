@@ -90,6 +90,26 @@ def preprocess_data_bart(data):
     }
 
 
+def preprocess_data_prophetnet(data):
+    input_text, target_text, tokenizer, args = data
+
+    input_ids = tokenizer.batch_encode_plus(
+        [input_text], max_length=args.max_seq_length, padding="max_length", return_tensors="pt", truncation=True
+    )
+
+    target_ids = tokenizer.batch_encode_plus(
+        [target_text], max_length=args.max_seq_length, padding="max_length", return_tensors="pt", truncation=True
+    )['input_ids']
+
+    target_ids[target_ids == tokenizer.pad_token_id] = -100
+
+    return {
+        "input_ids": input_ids["input_ids"].squeeze(),
+        "attention_mask": input_ids["attention_mask"].squeeze(),
+        "labels": target_ids.squeeze(),
+    }
+
+
 class SimpleSummarizationDataset(Dataset):
     def __init__(self, tokenizer, args, data, mode):
         self.tokenizer = tokenizer
@@ -108,6 +128,9 @@ class SimpleSummarizationDataset(Dataset):
         else:
             logger.info(" Creating features from dataset file at %s", args.cache_dir)
 
+            preprocess_fn = preprocess_data_prophetnet if args.model_type in ["prophetnet", "xprophetnet"] \
+                else preprocess_data_bart
+
             data = [
                 (input_text, target_text, tokenizer, args)
                 for input_text, target_text in zip(data["input_text"], data["target_text"])
@@ -117,13 +140,13 @@ class SimpleSummarizationDataset(Dataset):
                 with Pool(args.process_count) as p:
                     self.examples = list(
                         tqdm(
-                            p.imap(preprocess_data_bart, data, chunksize=args.multiprocessing_chunksize),
+                            p.imap(preprocess_fn, data, chunksize=args.multiprocessing_chunksize),
                             total=len(data),
                             disable=args.silent,
                         )
                     )
             else:
-                self.examples = [preprocess_data_bart(d) for d in tqdm(data, disable=args.silent)]
+                self.examples = [preprocess_fn(d) for d in tqdm(data, disable=args.silent)]
 
     def __len__(self):
         return len(self.examples)

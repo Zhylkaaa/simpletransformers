@@ -1046,7 +1046,7 @@ class Seq2SeqModel:
 
     def _get_inputs_dict(self, batch):
         device = self.device
-        if self.args.model_type in ["bart", "marian", "prophetnet", "xprophetnet"]:
+        if self.args.model_type in ["bart", "marian"]:
             pad_token_id = self.encoder_tokenizer.pad_token_id
             source_ids, source_mask, y = batch["source_ids"], batch["source_mask"], batch["target_ids"]
             y_ids = y[:, :-1].contiguous()
@@ -1058,6 +1058,12 @@ class Seq2SeqModel:
                 "attention_mask": source_mask.to(device),
                 "decoder_input_ids": y_ids.to(device),
                 "labels": lm_labels.to(device),
+            }
+        elif self.args.model_type in ["prophetnet", "xprophetnet"]:
+            inputs = {
+                "input_ids": batch["input_ids"].to(device),
+                "attention_mask": batch['attention_mask'].to(device),
+                "labels": batch['labels'].to(device) # decoder_input_ids will be calculated from labels in `forward` method with model specific function
             }
         else:
             lm_labels = batch[1]
