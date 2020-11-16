@@ -1008,7 +1008,7 @@ class Seq2SeqModel:
                 os.makedirs(os.path.join(output_dir), exist_ok=True)
                 model_to_save.save_pretrained(output_dir)
                 self.config.save_pretrained(output_dir)
-                if self.args.model_type == "bart":
+                if self.args.model_type in ["bart", "prophetnet", "xprophetnet"]:
                     self.encoder_tokenizer.save_pretrained(output_dir)
             else:
                 os.makedirs(os.path.join(output_dir, "encoder"), exist_ok=True)
