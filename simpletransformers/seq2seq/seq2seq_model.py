@@ -1060,16 +1060,12 @@ class Seq2SeqModel:
                 "labels": lm_labels.to(device),
             }
         elif self.args.model_type in ["prophetnet", "xprophetnet"]:
-            input_ids = batch.pop("input_ids")
-            attention_mask = batch.pop('attention_mask')
-            labels = batch.pop('labels')
-            reduction = batch.pop("reduction", "sum")[0]
+            input_ids, attention_mask, labels = batch["input_ids"], batch['attention_mask'], batch['labels']
 
             inputs = {
                 "input_ids": input_ids.to(device),
                 "attention_mask": attention_mask.to(device),
-                "labels": labels.to(device), # decoder_input_ids will be calculated from labels in `forward` method with model specific function
-                "reduction": reduction
+                "labels": labels.to(device),  # decoder_input_ids will be calculated from labels in `forward` method with model specific function
             }
         else:
             lm_labels = batch[1]
