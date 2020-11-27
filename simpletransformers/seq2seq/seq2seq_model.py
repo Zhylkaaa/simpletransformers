@@ -404,7 +404,9 @@ class Seq2SeqModel:
         args.warmup_steps = warmup_steps if args.warmup_steps == 0 else args.warmup_steps
 
         # TODO: Use custom optimizer like with BertSum?
-        optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
+        optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon,
+                          betas=(args.adam_beta1, args.adam_beta2))
+
         scheduler = get_linear_schedule_with_warmup(
             optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
         )
