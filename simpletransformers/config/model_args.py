@@ -190,7 +190,7 @@ class NERArgs(ModelArgs):
     onnx: bool = False
     special_tokens_list: list = field(default_factory=list)
     loss_type: str = None
-    loss_args: dict = {}
+    loss_args: dict = field(default_factory=dict)
 
 
 @dataclass
