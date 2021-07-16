@@ -485,6 +485,10 @@ class NERModel:
         attention_mask = inputs.get("attention_mask")
 
         if self.args.loss_type == 'dice':
+            # TODO: refactor (remove hardcoded values)
+            if attention_mask:
+                attention_mask[labels == -100] = 0
+            labels[labels == -100] = 0
             loss = self.loss_fct(logits, labels, attention_mask)
         elif self.loss_fct:
             if attention_mask is not None:
