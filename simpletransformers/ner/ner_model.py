@@ -480,16 +480,17 @@ class NERModel:
         outputs = model(**inputs)
         # model outputs are always tuple in pytorch-transformers (see doc)
         loss = outputs[0]
-        logits = outputs[1]
-        labels = inputs["labels"]
+        logits = outputs[1].clone()
+        labels = inputs["labels"].clone()
         attention_mask = inputs.get("attention_mask")
 
         if self.args.loss_type == 'dice':
             # TODO: refactor (remove hardcoded values)
             if attention_mask is not None:
+                attention_mask = attention_mask.clone()
                 attention_mask[labels == -100] = 0
                 batch_size = attention_mask.shape[0]
-                attention_mask = attention_mask.view(batch_size, -1, 1).contiguous()
+                attention_mask = attention_mask.reshape(batch_size, -1, 1)
             labels[labels == -100] = 0
             loss = self.loss_fct(logits, labels, attention_mask)
         elif self.loss_fct:
