@@ -189,6 +189,8 @@ class NERArgs(ModelArgs):
     lazy_loading_start_line: int = 0
     onnx: bool = False
     special_tokens_list: list = field(default_factory=list)
+    loss_type: str = None
+    loss_args: dict = {}
 
 
 @dataclass

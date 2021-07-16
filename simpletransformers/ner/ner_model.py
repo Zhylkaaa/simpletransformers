@@ -100,6 +100,7 @@ from transformers.optimization import (
     get_cosine_with_hard_restarts_schedule_with_warmup,
     get_polynomial_decay_schedule_with_warmup,
 )
+from losses import DiceLoss
 
 try:
     import wandb
@@ -291,6 +292,9 @@ class NERModel:
             self.loss_fct = CrossEntropyLoss(
                 weight=torch.Tensor(self.weight).to(self.device)
             )
+        elif args.loss_type:
+            if args.loss_type == 'dice':
+                self.loss_fct = DiceLoss(**args.loss_args)
         else:
             self.loss_fct = None
 
@@ -476,10 +480,13 @@ class NERModel:
         outputs = model(**inputs)
         # model outputs are always tuple in pytorch-transformers (see doc)
         loss = outputs[0]
-        if self.loss_fct:
-            logits = outputs[1]
-            labels = inputs["labels"]
-            attention_mask = inputs.get("attention_mask")
+        logits = outputs[1]
+        labels = inputs["labels"]
+        attention_mask = inputs.get("attention_mask")
+
+        if self.args.loss_type == 'dice':
+            loss = self.loss_fct(logits, labels, attention_mask)
+        elif self.loss_fct:
             if attention_mask is not None:
                 active_loss = attention_mask.view(-1) == 1
                 active_logits = logits.view(-1, self.num_labels)
