@@ -100,7 +100,7 @@ from transformers.optimization import (
     get_cosine_with_hard_restarts_schedule_with_warmup,
     get_polynomial_decay_schedule_with_warmup,
 )
-from losses import DiceLoss
+from simpletransformers.ner.losses import DiceLoss
 
 try:
     import wandb
