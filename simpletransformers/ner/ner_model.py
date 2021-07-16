@@ -486,7 +486,7 @@ class NERModel:
 
         if self.args.loss_type == 'dice':
             # TODO: refactor (remove hardcoded values)
-            if attention_mask:
+            if attention_mask is not None:
                 attention_mask[labels == -100] = 0
             labels[labels == -100] = 0
             loss = self.loss_fct(logits, labels, attention_mask)
