@@ -1,1 +1,1 @@
-from dice_loss import DiceLoss
+from simpletransformers.ner.losses.dice_loss import DiceLoss
